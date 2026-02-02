@@ -4,25 +4,60 @@ import { useState } from 'react';
 
 export function Contact() {
   const [formData, setFormData] = useState({
-    name: '',
+    fullName: '',
     email: '',
+    phoneNumber: '',
+    address: '',
+    pinCode: '',
     message: ''
   });
 
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real application, this would send the data to a backend
-    console.log('Form submitted:', formData);
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({ name: '', email: '', message: '' });
-    }, 3000);
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const res = await fetch('https://shivmil.vercel.app/api/mailsend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      setIsSubmitted(true);
+
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData({
+          fullName: '',
+          email: '',
+          phoneNumber: '',
+          address: '',
+          pinCode: '',
+          message: ''
+        });
+      }, 3000);
+    } catch (err) {
+      console.error(err);
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
@@ -71,134 +106,119 @@ export function Contact() {
             </motion.div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Name Input */}
+              {/* Full Name */}
               <div>
-                <label htmlFor="name" className="block text-sm text-zinc-300 mb-2">
+                <label className="block text-sm text-zinc-300 mb-2">
                   Your Name
                 </label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                   <input
                     type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
+                    name="fullName"
+                    value={formData.fullName}
                     onChange={handleChange}
                     required
-                    className="w-full bg-zinc-900/50 border border-zinc-700 focus:border-teal-500 rounded-lg pl-12 pr-4 py-3 text-white placeholder-zinc-500 outline-none transition-colors duration-300"
+                    className="w-full bg-zinc-900/50 border border-zinc-700 focus:border-teal-500 rounded-lg pl-12 pr-4 py-3 text-white outline-none"
                     placeholder="John Doe"
                   />
                 </div>
               </div>
 
-              {/* Email Input */}
+              {/* Email */}
               <div>
-                <label htmlFor="email" className="block text-sm text-zinc-300 mb-2">
+                <label className="block text-sm text-zinc-300 mb-2">
                   Email Address
                 </label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
                   <input
                     type="email"
-                    id="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full bg-zinc-900/50 border border-zinc-700 focus:border-teal-500 rounded-lg pl-12 pr-4 py-3 text-white placeholder-zinc-500 outline-none transition-colors duration-300"
+                    className="w-full bg-zinc-900/50 border border-zinc-700 focus:border-teal-500 rounded-lg pl-12 pr-4 py-3 text-white outline-none"
                     placeholder="john@example.com"
                   />
                 </div>
               </div>
 
-              {/* Message Textarea */}
+              {/* Phone */}
               <div>
-                <label htmlFor="message" className="block text-sm text-zinc-300 mb-2">
+                <label className="block text-sm text-zinc-300 mb-2">
+                  Phone Number
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-zinc-900/50 border border-zinc-700 focus:border-teal-500 rounded-lg pl-12 pr-4 py-3 text-white outline-none"
+                    placeholder="+91 9XXXXXXXXX"
+                  />
+                </div>
+              </div>
+
+              {/* Address */}
+              <div>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  className="w-full bg-zinc-900/50 border border-zinc-700 rounded-lg px-4 py-3 text-white outline-none"
+                  placeholder="Address"
+                />
+              </div>
+
+              {/* Pin Code */}
+              <div>
+                <input
+                  type="text"
+                  name="pinCode"
+                  value={formData.pinCode}
+                  onChange={handleChange}
+                  className="w-full bg-zinc-900/50 border border-zinc-700 rounded-lg px-4 py-3 text-white outline-none"
+                  placeholder="PIN Code"
+                />
+              </div>
+
+              {/* Message */}
+              <div>
+                <label className="block text-sm text-zinc-300 mb-2">
                   Your Message
                 </label>
                 <div className="relative">
                   <MessageSquare className="absolute left-4 top-4 w-5 h-5 text-zinc-500" />
                   <textarea
-                    id="message"
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
-                    required
                     rows={6}
-                    className="w-full bg-zinc-900/50 border border-zinc-700 focus:border-teal-500 rounded-lg pl-12 pr-4 py-3 text-white placeholder-zinc-500 outline-none transition-colors duration-300 resize-none"
+                    className="w-full bg-zinc-900/50 border border-zinc-700 rounded-lg pl-12 pr-4 py-3 text-white outline-none resize-none"
                     placeholder="Tell me about your project..."
                   />
                 </div>
               </div>
 
-              {/* Submit Button */}
+              {error && (
+                <p className="text-red-400 text-sm">{error}</p>
+              )}
+
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-teal-500 to-amber-500 hover:from-teal-600 hover:to-amber-600 text-white py-4 rounded-lg transition-all duration-300 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 hover:scale-[1.02] flex items-center justify-center gap-2"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-teal-500 to-amber-500 text-white py-4 rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 <Send className="w-5 h-5" />
-                Send Message
+                {isSubmitting ? 'Sending...' : 'Send Message'}
               </button>
             </form>
           )}
-        </motion.div>
-
-        {/* Contact Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
-          viewport={{ once: true }}
-          className="mt-12"
-        >
-          <p className="text-zinc-400 mb-6 text-center">Or reach out directly:</p>
-          
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Email */}
-            <a
-              href="mailto:shivpatilfusion940@gmail.com"
-              className="flex flex-col items-center gap-3 bg-zinc-800/50 border border-zinc-700 hover:border-teal-500/50 rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/10"
-            >
-              <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-amber-500 rounded-full flex items-center justify-center">
-                <Mail className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-zinc-400 mb-1">Email</p>
-                <p className="text-teal-400 hover:text-teal-300 transition-colors">
-                  shivpatilfusion940@gmail.com
-                </p>
-              </div>
-            </a>
-
-            {/* Phone */}
-            <a
-              href="tel:+917337710665"
-              className="flex flex-col items-center gap-3 bg-zinc-800/50 border border-zinc-700 hover:border-teal-500/50 rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/10"
-            >
-              <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-amber-500 rounded-full flex items-center justify-center">
-                <Phone className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-zinc-400 mb-1">Phone</p>
-                <p className="text-teal-400 hover:text-teal-300 transition-colors">
-                  +91 7337710665
-                </p>
-              </div>
-            </a>
-
-            {/* Location */}
-            <div className="flex flex-col items-center gap-3 bg-zinc-800/50 border border-zinc-700 rounded-xl p-6">
-              <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-amber-500 rounded-full flex items-center justify-center">
-                <MapPin className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-zinc-400 mb-1">Location</p>
-                <p className="text-zinc-300">
-                  Humnabad, Bidar<br />Karnataka
-                </p>
-              </div>
-            </div>
-          </div>
         </motion.div>
       </div>
     </section>
